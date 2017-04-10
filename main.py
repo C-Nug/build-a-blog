@@ -1,25 +1,70 @@
-#!/usr/bin/env python
-#
-# Copyright 2007 Google Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
 import webapp2
+import os
+import jinja2
 
-class MainHandler(webapp2.RequestHandler):
+template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
+
+# allows you to use databases with GAE
+from google.appengine.ext import db
+
+class Handler(webapp2.RequestHandler):
+    def write(self, *a, **kw):
+        self.response.write(*a, **kw)
+
+    def render_str(self, template, **params):
+        t = jinja_env.get_template(template)
+        return t.render(params)
+
+    def render(self, template, **kw):
+        self.write(self.render_str(template, **kw))
+
+class BlogPost(db.Model):
+    blog_title = db.StringProperty(required = True)
+    blog_body = db.TextProperty(required = True)
+    created = db.DateTimeProperty(auto_now_add = True)
+
+
+class MainHandler(Handler):
+    def render_home(self, blog_title="", blog_body="", error=""):
+        blog_posts = db.GqlQuery("SELECT * FROM BlogPost ORDER BY created DESC LIMIT 5")
+
+        posts = BlogPost(blog_posts)
+        post_ids = []
+        for post in posts:
+            post_ids.append(posts.key().id())
+
+        self.render("homepage.html", blog_title = blog_title,
+                    blog_body = blog_body, error = error,
+                    blog_posts = blog_posts, post_ids = post_ids)
+
     def get(self):
-        self.response.write('Hello world!')
+        self.render_home()
+
+    def post(self):
+        blog_title = self.request.get("blog_title")
+        blog_body = self.request.get("blog_body")
+
+        if blog_title and blog_body:
+            new_blog = BlogPost(blog_title = blog_title, blog_body = blog_body)
+            new_blog.put()
+
+            self.redirect("/")
+        else:
+            no_input_error = "Pleast enter a title and a blog entry"
+            self.render_home(blog_title, blog_body, no_input_error)
+
+class ViewPostHandler(Handler):
+    def get(self, id):
+        id = int(id)
+        single_post = BlogPost.get_by_id(id)
+
+        if single_post:
+            self.render("single_blog_post.html", single_post = single_post)
+        else:
+            self.write("<h3>This post does not exist</h3>")
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', MainHandler),
+    webapp2.Route('/<id:\d+>', ViewPostHandler)
 ], debug=True)

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>CNUG BLOG HAPPY FUN TIME WOW!</title>
+    <style type="text/css">
+        body {
+          font-family: sans-serif;
+          width: 1000px;
+          margin: 0 auto;
+          padding: 10px;
+          font-size: 16px;
+        }
+        label {
+          display: block;
+          font-size: 1.25em;
+          padding-top: 10px;
+          padding-bottom: 10px;
+        }
+        .error {
+          color: red
+        }
+        input[type=text] {
+          width: 400px;
+          font-size: 1.1em;
+          padding: 2px;
+        }
+        textarea {
+          width: 400px;
+          height: 200px;
+          font-size: 0.75em;
+          font-family: monospace;
+          margin-top: 5px;
+        }
+        input[type=submit] {
+          font-size: 1.5em;
+        }
+        hr {
+          margin: 20px auto;
+        }
+        .blog_post {
+          margin-top: 20px;
+        }
+        .blog_title {
+          font-weight: bold;
+          font-size: 1.45em;
+        }
+        .blog_body {
+          margin-top: 5px;
+          font-size: 1.05em;
+        }
+
+    </style>
+  </head>
+
+  <body>
+    <h2><a href="/">BLOG TIME!</a></h2>
+
+    {% block content %}
+    {% endblock %}
+
+  </body>
+</html>
