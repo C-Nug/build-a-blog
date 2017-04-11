@@ -29,14 +29,9 @@ class MainHandler(Handler):
     def render_home(self, blog_title="", blog_body="", error=""):
         blog_posts = db.GqlQuery("SELECT * FROM BlogPost ORDER BY created DESC LIMIT 5")
 
-        posts = BlogPost(blog_posts)
-        post_ids = []
-        for post in posts:
-            post_ids.append(posts.key().id())
-
         self.render("homepage.html", blog_title = blog_title,
                     blog_body = blog_body, error = error,
-                    blog_posts = blog_posts, post_ids = post_ids)
+                    blog_posts = blog_posts)
 
     def get(self):
         self.render_home()
@@ -54,6 +49,7 @@ class MainHandler(Handler):
             no_input_error = "Pleast enter a title and a blog entry"
             self.render_home(blog_title, blog_body, no_input_error)
 
+# Links to a single blog post from the front page
 class ViewPostHandler(Handler):
     def get(self, id):
         id = int(id)

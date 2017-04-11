@@ -27,7 +27,7 @@
 {% for post in blog_posts %}
   <div class="blog_post">
     <div class="blog_title">
-      <a href="/{{ post_ids[post] }}">{{ post.blog_title }}</a>
+      <a href="/{{ post.key().id() }}">{{ post.blog_title }}</a>
     </div>
     <pre class="blog_body">{{ post.blog_body }}</pre>
   </div>
